@@ -13,9 +13,8 @@ import (
 )
 
 // DefaultTableNameHandler default table name handler
-var DefaultTableNameHandler = func(db *DB, defaultTableName string) string {
-	return defaultTableName
-}
+//
+var DefaultTableNameHandler = func(db *DB, defaultTableName string) string
 
 var modelStructsMap sync.Map
 
@@ -33,7 +32,7 @@ type ModelStruct struct {
 func (s *ModelStruct) TableName(db *DB) string {
 	s.l.Lock()
 	defer s.l.Unlock()
-
+	
 	if s.defaultTableName == "" && db != nil && s.ModelType != nil {
 		// Set default table name
 		if tabler, ok := reflect.New(s.ModelType).Interface().(tabler); ok {
@@ -46,8 +45,12 @@ func (s *ModelStruct) TableName(db *DB) string {
 			s.defaultTableName = tableName
 		}
 	}
-
-	return DefaultTableNameHandler(db, s.defaultTableName)
+	
+	if DefaultTableNameHandler == nil {
+		return self.defaultTableName
+	} else {
+		return DefaultTableNameHandler(db, s.defaultTableName)
+	}
 }
 
 // StructField model field's struct definition
